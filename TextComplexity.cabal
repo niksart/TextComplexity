@@ -61,12 +61,13 @@ executable TextComplexity
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.11 && <4.12,
                        containers,
-                       aeson,
-                       bytestring
+                       split
 
   -- Directories containing source files.
   hs-source-dirs:      src
 
   -- Base language which the package is written in.
   default-language:    Haskell2010
-
+  
+  -- Other modules made by the author
+  -- other-modules:
