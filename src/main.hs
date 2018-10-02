@@ -48,7 +48,11 @@ convertLemma lemmasMap word =
 stringReport :: ([String], [String]) -> String
 stringReport (inputWords, complexWords) =
   show ((length complexWords * 100) `div` length inputWords)
-  ++ " % of the words are not in the Oxford 3000 list.\n\nHere are the words:\n" 
+  ++ " % of the words are not in the Oxford 3000 list ("
+  ++ show (length complexWords)
+  ++ " over "
+  ++ show (length inputWords)
+  ++ ").\n\nHere are the words:\n" 
   ++ intercalate ", " (Set.toList $ Set.fromList complexWords)
   ++ "\n"
 
