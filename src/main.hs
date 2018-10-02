@@ -1,6 +1,7 @@
 import qualified Data.Set as Set
 import Debug.Trace
 import Data.Char
+import Data.List (intersperse)
 import qualified Data.Maybe as Maybe
 import qualified Data.Map.Strict as Map
 import qualified Data.ByteString.Lazy as BS
@@ -32,17 +33,21 @@ hasSpaces [] = False
 hasSpaces (l:ll) | l == ' '  = True
                  | otherwise = hasSpaces ll
 
-getComplexityPercentage :: Set.Set String -> [String] -> Int
-getComplexityPercentage dictWords inputWords = 100 - ((getComplexityPercentage' inputWords dictWords 0 * 100) `div` (length inputWords))
+-- | I've choose a list because of repetitions of some words in the text
+getComplexWords :: Set.Set String -> [String] -> ([String], [String])
+getComplexWords dictWords inputWords = (inputWords, getComplexWords' dictWords inputWords [])
 
-getComplexityPercentage' [] dictWords counter = counter
-getComplexityPercentage' (w:ww) dictWords counter 
-  | Set.member w dictWords = getComplexityPercentage' ww dictWords (counter + 1)
-  | otherwise              = trace w $ getComplexityPercentage' ww dictWords counter
+getComplexWords' dictWords [] complexWords = complexWords
+getComplexWords' dictWords (w:ww) complexWords 
+  | Set.member w dictWords = getComplexWords' dictWords ww complexWords
+  | otherwise              = getComplexWords' dictWords ww (w:complexWords)
 
 convertLemma lemmasMap word = 
   if Map.lookup word lemmasMap == Nothing then word else (Maybe.fromJust(Map.lookup word lemmasMap))
 
+stringReport :: ([String], [String]) -> String
+stringReport (inputWords, complexWords) =
+  (show ((length complexWords)*100 `div` (length inputWords))) ++ " % of the words are not in the Oxford 3000 list.\n\nHere are the words:\n" ++ (concat (intersperse ", " (Set.toList(Set.fromList complexWords)))) ++ "\n"
 
 main = do
   words3000String <- readFile "resources/oxford-3000.txt"
@@ -52,13 +57,12 @@ main = do
   let lemmasMap = Maybe.fromJust (Aeson.decode lemmasMapString :: Maybe (Map.Map String String))
   
   interact $
-    (++ " % of the words are not inside the Oxford 3000 list.\n") .
-    show .
-    getComplexityPercentage words3000Set .
+    stringReport .
+    getComplexWords words3000Set .
     filter (/= "") .
     map (convertLemma lemmasMap) . -- convert coniugated words
-    map (filter isAdmissible) . -- delete punctuation
     map convertToLower . -- lowercase characters
     words .
+    map (\c -> if isAdmissible c == False then ' ' else c) .
     spaceBeforeQuote
        
