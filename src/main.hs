@@ -18,13 +18,14 @@ convertToLower [] = []
 convertToLower "I" = "I"
 convertToLower (c:cc) = toLower c : convertToLower cc
 
-spaceBeforeQuote' :: Char -> String
-spaceBeforeQuote' '\'' = " '"
-spaceBeforeQuote' c = [c]
+truncateAfterQuote' :: String -> String -> String
+truncateAfterQuote' [] word = word
+truncateAfterQuote' ('\'': ss) _ = ss
+truncateAfterQuote' (_: ss) word = truncateAfterQuote' ss word
 
-spaceBeforeQuote :: String -> String
-spaceBeforeQuote [] = []
-spaceBeforeQuote (s:ss) = spaceBeforeQuote' s ++ spaceBeforeQuote ss
+-- the contractions have already been relaxed. Now I can truncate quotes because it's only used in genitive
+truncateAfterQuote :: String -> String
+truncateAfterQuote s = reverse $ truncateAfterQuote' (reverse s) (reverse s)
 
 hasSpaces :: String -> Bool
 hasSpaces [] = False
@@ -64,12 +65,13 @@ main = do
   lemmasMapString <- BS.readFile "resources/lemmasMap.json"
   let lemmasMap = Maybe.fromJust (Aeson.decode lemmasMapString :: Maybe (Map String String))
   
+  contractionsString <- BS.readFile "resources/contractions.json"
+  let contractionsMap = Maybe.fromJust (Aeson.decode contractionsString :: Maybe (Map String String))
+  
   interact $
     stringReport .
     getComplexWords words3000Set .
     filter (/= "") .
-    map (convertLemma lemmasMap . convertToLower) . -- convert coniugated words and to lower
+    map (truncateAfterQuote . convertLemma lemmasMap . convertLemma contractionsMap  . convertToLower) . -- convert coniugated words and to lower
     words .
-    map (\c -> if not $ isAdmissible c then ' ' else c) .
-    spaceBeforeQuote
-       
+    map (\c -> if not $ isAdmissible c then ' ' else c)
