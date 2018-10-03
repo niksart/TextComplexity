@@ -18,15 +18,6 @@ convertToLower [] = []
 convertToLower "I" = "I"
 convertToLower (c:cc) = toLower c : convertToLower cc
 
-truncateAfterQuote' :: String -> String -> String
-truncateAfterQuote' [] word = word
-truncateAfterQuote' ('\'': ss) _ = ss
-truncateAfterQuote' (_: ss) word = truncateAfterQuote' ss word
-
--- the contractions have already been relaxed. Now I can truncate quotes because it's only used in genitive
-truncateAfterQuote :: String -> String
-truncateAfterQuote s = reverse $ truncateAfterQuote' (reverse s) (reverse s)
-
 hasSpaces :: String -> Bool
 hasSpaces [] = False
 hasSpaces (l:ll) | l == ' '  = True
@@ -72,6 +63,6 @@ main = do
     stringReport .
     getComplexWords words3000Set .
     filter (/= "") .
-    map (truncateAfterQuote . convertLemma lemmasMap . convertLemma contractionsMap  . convertToLower) . -- convert coniugated words and to lower
+    map (takeWhile (/= '\'') . convertLemma lemmasMap . convertLemma contractionsMap  . convertToLower) . -- convert coniugated words and to lower
     words .
     map (\c -> if not $ isAdmissible c then ' ' else c)
