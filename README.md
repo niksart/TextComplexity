@@ -25,4 +25,4 @@ abide, aboard, abruptly, absentee, abstraction, absurd, ...
 - plural words convertion ("cats" => "cat", "boxes" => "box")
 - verb conjugations convertion ("is" => "be", "stopped" => "stop", "goes" => "go")
 - contractions convertion
-- saxon genitive support
+- saxon genitive convertion
