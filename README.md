@@ -4,7 +4,7 @@
 TextComplexity analyzes an English text and returns the list of complex words and their percentage up to the whole text.
 
 ### When is a word complex?
-The criterion is very easy: _is the word inside Oxford3000 list?_. Oxford made indeed a more or less 3000 word list that contains the most used words in English. This list can commonly supply the 90% of ordinary vocabulary words.
+The criterion is very easy: _is the word inside Oxford3000 list?_. Oxford3000 is a 3000 word list that contains the most used words in English. This list can commonly supply the 90% of ordinary vocabulary words.
 
 ### How can I use it?
 1. Install `cabal`, Haskell's package manager, if you haven't it yet
